@@ -29,13 +29,21 @@
       e.preventDefault();
 
       const formData = new FormData(form);
-      const response = await fetch('https://iris-api-qdme.onrender.com/predict', {
-        method: 'POST',
-        body: formData
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value;
       });
 
-      const data = await response.json();
-      document.getElementById('result').innerText = 'Prediction: ' + data.prediction;
+      const response = await fetch('https://iris-api-qdme.onrender.com/predict', {
+        method: 'POST',
+        body: JSON.stringify(data),  // Send data as JSON
+        headers: {
+          'Content-Type': 'application/json'  // Set the content type to JSON
+        }
+      });
+
+      const result = await response.json();
+      document.getElementById('result').innerText = 'Prediction: ' + result.prediction;
     });
   </script>
 </body>

@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import joblib
-import numpy as np
 
 # Load the trained model
 model = joblib.load("iris_model.pkl")
 
 # Create Flask app
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 @app.route('/')
 def home():
@@ -15,13 +16,13 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Try to parse JSON data first; fall back to form data
+        # Parse input JSON or form data
         if request.is_json:
             data = request.get_json()
         else:
             data = request.form
 
-        # Extract and validate features
+        # Extract and validate input values
         features = [
             float(data['sepal_length']),
             float(data['sepal_width']),
@@ -33,17 +34,18 @@ def predict():
     except ValueError:
         return jsonify({"error": "All inputs must be numeric."}), 400
 
-    # Make prediction
+    # Predict using the loaded model
     prediction = model.predict([features])[0]
 
-    # Convert prediction to class name if it's a numeric label
+    # Map prediction index to class name (if needed)
     classes = ['Setosa', 'Versicolor', 'Virginica']
     try:
         result = classes[int(prediction)]
     except (ValueError, IndexError):
-        result = prediction  # If already a class name, just return it
+        result = prediction  # Already a class name or unexpected label
 
     return jsonify({"prediction": result})
 
+# Only run this locally. In production (e.g., Render), Gunicorn will be used.
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
