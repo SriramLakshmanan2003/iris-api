@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import joblib
 
@@ -8,10 +8,12 @@ model = joblib.load("iris_model.pkl")
 # Create Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+model = joblib.load("iris_model.pkl")
+
 
 @app.route('/')
 def home():
-    return "Welcome to Iris Flower Prediction API!"
+    return render_template("index.html") 
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -48,4 +50,4 @@ def predict():
 
 # Only run this locally. In production (e.g., Render), Gunicorn will be used.
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
